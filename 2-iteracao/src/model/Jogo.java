@@ -240,11 +240,13 @@ public class Jogo {
     }
 
     /**
-     * Indica se o jogador atual pode passar a vez (já moveu ou
-     * já usou a passagem secreta nesta rodada).
+     * Indica se o jogador atual pode passar a vez (já moveu, já usou
+     * a passagem secreta, ou lançou os dados mas não tem destino válido).
      */
     public boolean podePassarVez() {
-        return jaMoveouNestaVez;
+        if (jaMoveouNestaVez) return true;
+        // Dados lançados mas nenhum destino alcançável: permite passar sem travar.
+        return ultimoLancamento != null && getCasasAlcancaveis().isEmpty();
     }
 
     /** Lança os dois dados (ou usa valores definidos via setDadosManuais). */
@@ -336,7 +338,7 @@ public class Jogo {
 
     /** True se o jogador da vez está num cômodo com passagem secreta. */
     public boolean podeUsarPassagemSecreta() {
-        if (usouPassagemSecretaNaVez) return false;
+        if (usouPassagemSecretaNaVez || jaMoveouNestaVez || ultimoLancamento != null) return false;
         Casa c = jogadores.get(indiceJogadorAtual).getPino().getCasa();
         return c.isComodo() && c.getComodo().temPassagemSecreta();
     }
