@@ -112,10 +112,21 @@ public class ResourceLoader {
     private void carregarTabuleiro(Jogo jogo, int larg, int alt) {
         BufferedImage img = lerImagem("Tabuleiros/Tabuleiro-Clue-A.jpg");
         if (img != null) {
-            tabuleiro = img;
+            tabuleiro = escalar(img, larg, alt);
         } else {
             tabuleiro = gerarTabuleiroPlaceholder(jogo, larg, alt);
         }
+    }
+
+    private BufferedImage escalar(BufferedImage src, int larg, int alt) {
+        if (src.getWidth() == larg && src.getHeight() == alt) return src;
+        BufferedImage dst = new BufferedImage(larg, alt, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = dst.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                           RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(src, 0, 0, larg, alt, null);
+        g.dispose();
+        return dst;
     }
 
     private BufferedImage gerarTabuleiroPlaceholder(Jogo jogo, int larg, int alt) {
