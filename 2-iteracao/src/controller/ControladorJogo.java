@@ -43,7 +43,7 @@ public class ControladorJogo {
         painelLateral.getBtnLancar().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (jogo.jaLancouNestaVez()) return;
+                if (!jogo.podeLancarDados()) return;
                 jogo.lancarDados();
                 refresh();
             }
@@ -54,7 +54,7 @@ public class ControladorJogo {
             new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (jogo.jaLancouNestaVez()) return;
+                    if (!jogo.podeLancarDados()) return;
                     int d1 = painelLateral.getComboD1Selecionado();
                     int d2 = painelLateral.getComboD2Selecionado();
                     jogo.setDadosManuais(d1, d2);
@@ -79,6 +79,14 @@ public class ControladorJogo {
             public void actionPerformed(ActionEvent e) {
                 jogo.proximoJogador();
                 refresh();
+            }
+        });
+
+        // Botão "Salvar Jogo" — stub; salvamento completo em iteração futura
+        painelLateral.getBtnSalvar().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Salvar Jogo: a ser implementado na próxima iteração.");
             }
         });
 

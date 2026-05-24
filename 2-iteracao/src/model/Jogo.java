@@ -45,6 +45,7 @@ public class Jogo {
     private int indiceJogadorAtual;
     private int[] ultimoLancamento; // null antes de lançar; resetado ao deslocar
     private boolean usouPassagemSecretaNaVez;
+    private boolean jaMoveouNestaVez; // impede novo lançamento após mover
 
     /**
      * Cria uma nova partida. Recebe o número de jogadores
@@ -76,6 +77,7 @@ public class Jogo {
         this.indiceJogadorAtual = 0;
         this.ultimoLancamento = null;
         this.usouPassagemSecretaNaVez = false;
+        this.jaMoveouNestaVez = false;
     }
 
     // ============================================================
@@ -229,6 +231,22 @@ public class Jogo {
     // DADOS
     // ============================================================
 
+    /**
+     * Indica se o jogador atual ainda pode lançar os dados.
+     * Retorna false se já lançou nesta vez ou se já moveu.
+     */
+    public boolean podeLancarDados() {
+        return !jaMoveouNestaVez && ultimoLancamento == null;
+    }
+
+    /**
+     * Indica se o jogador atual pode passar a vez (já moveu ou
+     * já usou a passagem secreta nesta rodada).
+     */
+    public boolean podePassarVez() {
+        return jaMoveouNestaVez;
+    }
+
     /** Lança os dois dados (ou usa valores definidos via setDadosManuais). */
     public int[] lancarDados() {
         this.ultimoLancamento = dados.lancar();
@@ -295,8 +313,8 @@ public class Jogo {
         Set<Integer> validas = getCasasAlcancaveis();
 
         int idAlvo;
-        if (destino.isComodo()) {
-            // clique dentro do cômodo equivale a entrar pela porta
+        if (destino.isComodo() || destino.isPorta()) {
+            // clique no interior do cômodo OU na sua porta → entra no cômodo
             idAlvo = destino.getComodo().getCasaPrincipal().getId();
         } else {
             idAlvo = destino.getId();
@@ -308,6 +326,7 @@ public class Jogo {
         Casa casaFinal = tabuleiro.getCasaPorId(idAlvo);
         jogadores.get(indiceJogadorAtual).getPino().setCasa(casaFinal);
         this.ultimoLancamento = null;
+        this.jaMoveouNestaVez = true;
         return true;
     }
 
@@ -336,6 +355,7 @@ public class Jogo {
             destino.getCasaPrincipal());
         this.usouPassagemSecretaNaVez = true;
         this.ultimoLancamento = null;
+        this.jaMoveouNestaVez = true;
         return true;
     }
 
@@ -348,6 +368,7 @@ public class Jogo {
         indiceJogadorAtual = (indiceJogadorAtual + 1) % jogadores.size();
         ultimoLancamento = null;
         usouPassagemSecretaNaVez = false;
+        jaMoveouNestaVez = false;
     }
 
     // ============================================================

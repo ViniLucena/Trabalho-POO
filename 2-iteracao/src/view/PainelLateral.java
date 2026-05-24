@@ -47,6 +47,7 @@ public class PainelLateral extends JPanel {
     private final JButton btnLancar;
     private final JButton btnPassagem;
     private final JButton btnProximo;
+    private final JButton btnSalvar;
     private final JComboBox<Integer> comboD1;
     private final JComboBox<Integer> comboD2;
     private final JButton btnAplicarDadosManuais;
@@ -115,8 +116,13 @@ public class PainelLateral extends JPanel {
         add(btnPassagem, gbc);
 
         btnProximo = new JButton("Próximo Jogador");
+        btnProximo.setEnabled(false);
         gbc.gridy = linha++;
         add(btnProximo, gbc);
+
+        btnSalvar = new JButton("Salvar Jogo");
+        gbc.gridy = linha++;
+        add(btnSalvar, gbc);
 
         gbc.gridy = linha++;
         gbc.weighty = 1.0;
@@ -132,6 +138,7 @@ public class PainelLateral extends JPanel {
     public JButton getBtnLancar()                  { return btnLancar; }
     public JButton getBtnPassagem()                { return btnPassagem; }
     public JButton getBtnProximo()                 { return btnProximo; }
+    public JButton getBtnSalvar()                  { return btnSalvar; }
     public JButton getBtnAplicarDadosManuais()     { return btnAplicarDadosManuais; }
     public int getComboD1Selecionado()             { return ((Integer) comboD1.getSelectedItem()).intValue(); }
     public int getComboD2Selecionado()             { return ((Integer) comboD2.getSelectedItem()).intValue(); }
@@ -143,8 +150,9 @@ public class PainelLateral extends JPanel {
         labelJogador.setText(nome);
         labelJogador.setForeground(ResourceLoader.corPino(cor));
 
-        btnLancar.setEnabled(!jogo.jaLancouNestaVez());
+        btnLancar.setEnabled(jogo.podeLancarDados());
         btnPassagem.setEnabled(jogo.podeUsarPassagemSecreta());
+        btnProximo.setEnabled(jogo.podePassarVez());
         painelDados.repaint();
     }
 
