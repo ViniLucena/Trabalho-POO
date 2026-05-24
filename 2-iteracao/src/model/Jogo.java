@@ -282,12 +282,6 @@ public class Jogo {
      * Lista os ids das Casas alcançáveis pelo jogador da vez,
      * dado o último lançamento. Inclui ids de cômodos: a View
      * apenas verifica se a casa clicada pertence a esse conjunto.
-     *
-     * As casas de corredor/porta ocupadas por outros pinos são
-     * filtradas (manual pg. 4: "Você não pode entrar, passar ou
-     * cair em um espaço que já é ocupado por algum outro
-     * Suspeito"). Pinos dentro de um cômodo não bloqueiam — o
-     * manual permite vários suspeitos no mesmo cômodo.
      */
     public Set<Integer> getCasasAlcancaveis() {
         if (ultimoLancamento == null) {
@@ -295,24 +289,7 @@ public class Jogo {
         }
         Casa origem = jogadores.get(indiceJogadorAtual).getPino().getCasa();
         int passos = ultimoLancamento[0] + ultimoLancamento[1];
-        Set<Integer> ocupadas = casasBloqueadasPorOutrosPinos();
-        return tabuleiro.mapearAlcancaveis(origem, passos, ocupadas);
-    }
-
-    /**
-     * Conjunto de ids de casas (corredor/porta) ocupadas por
-     * pinos de outros jogadores. Pinos em cômodo são ignorados,
-     * pois cômodos comportam vários suspeitos simultaneamente.
-     */
-    private Set<Integer> casasBloqueadasPorOutrosPinos() {
-        Set<Integer> ocupadas = new HashSet<Integer>();
-        for (int i = 0; i < jogadores.size(); i++) {
-            if (i == indiceJogadorAtual) continue;
-            Casa c = jogadores.get(i).getPino().getCasa();
-            if (c.isComodo()) continue;
-            ocupadas.add(c.getId());
-        }
-        return ocupadas;
+        return tabuleiro.mapearAlcancaveis(origem, passos);
     }
 
     /**

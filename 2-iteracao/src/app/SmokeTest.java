@@ -71,18 +71,18 @@ public class SmokeTest {
         verificar(!jogo.podePassarVez(),
             "NÃO pode passar vez antes de mover");
 
-        jogo.setDadosManuais(1, 1);
+        jogo.setDadosManuais(3, 4);
         int[] d = jogo.lancarDados();
-        verificar(d[0] == 1 && d[1] == 1,
-            "dados manuais retornam os valores definidos (1, 1)");
+        verificar(d[0] == 3 && d[1] == 4,
+            "dados manuais retornam os valores definidos (3, 4)");
         verificar(!jogo.podeLancarDados(),
             "NÃO pode lançar dados novamente após rolar");
         verificar(jogo.jaLancouNestaVez(),
             "jaLancouNestaVez = true após rolar");
 
-        // A soma dos dados é 2; Scarlet está em (24,7).
-        // Tenta mover para (22,7) — exatamente 2 passos para cima.
-        // (Manual: o jogador deve usar todos os passos do dado.)
+        // A soma dos dados é 7; Scarlet está em (24,7).
+        // Tenta mover para (22,7) — alcançável em 2 passos para cima.
+        // (Com dados = 7, 2 passos é menos que o máximo.)
         boolean moveu = jogo.tentarMover(22, 7);
         verificar(moveu, "tentarMover(22,7) retorna true (destino alcançável)");
         verificar(!jogo.podeLancarDados(),

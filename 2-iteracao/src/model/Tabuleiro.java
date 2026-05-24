@@ -3,8 +3,10 @@ package model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -211,101 +213,72 @@ class Tabuleiro {
 
     /**
      * Calcula todas as posições alcançáveis (ids de Casa) a
-     * partir da origem usando EXATAMENTE "passos" movimentos,
-     * respeitando as regras do manual oficial do Clue:
+     * partir da posição atual com exatamente "passos" movimentos
+     * ou menos, respeitando as regras descritas no Javadoc da
+     * classe.
      *
-     *  - O jogador deve usar todos os passos do dado em casas
-     *    de corredor (não pode parar antes), salvo se entrar
-     *    num cômodo (entrar encerra o movimento, mesmo que
-     *    sobrem passos — manual pg. 4).
-     *  - Não pode passar pelo mesmo espaço duas vezes na mesma
-     *    jogada (manual pg. 4).
-     *  - Não pode entrar, passar nem cair em casa ocupada por
-     *    outro Suspeito (manual pg. 4). Cômodos não bloqueiam:
-     *    vários pinos podem coexistir num cômodo.
-     *  - Não pode retornar ao mesmo cômodo em que iniciou a
-     *    jogada.
-     *
-     * Casas internas de um cômodo são representadas pelo id da
-     * casa principal: ao alcançar uma porta do cômodo, o id
-     * desse cômodo é adicionado ao conjunto alcançável.
-     *
-     * @param origem   casa onde o pino está
-     * @param passos   total dos dois dados
-     * @param ocupadas ids de casas (corredor/porta) ocupadas por
-     *                 outros pinos — bloqueiam tanto destino
-     *                 quanto travessia
+     * Retorna ids de Casa. Casas internas de um cômodo recebem
+     * tratamento especial: ao alcançar QUALQUER porta do cômodo,
+     * o jogador pode entrar (id da porta -> id da casa principal
+     * do cômodo).
      */
-    Set<Integer> mapearAlcancaveis(Casa origem, int passos,
-                                   Set<Integer> ocupadas) {
+    Set<Integer> mapearAlcancaveis(Casa origem, int passos) {
         Set<Integer> alcancaveis = new HashSet<>();
-        if (passos <= 0) return alcancaveis;
 
+        // Conjunto inicial de casas de onde sairemos. Se estamos
+        // num cômodo, podemos sair por qualquer uma de suas
+        // portas (já consumindo 1 passo para atravessar a porta).
+        List<Casa> origens = new ArrayList<>();
+        int passosIniciais = passos;
         if (origem.isComodo()) {
-            // Sair de um cômodo: o pino atravessa uma porta (de
-            // graça, segundo o manual: "Uma porta é a abertura
-            // presente na parede, não é o espaço em frente à
-            // entrada"). A casa em frente à porta — representada
-            // no código como uma casa do tipo PORTA — é o
-            // primeiro espaço gasto.
             for (Casa porta : origem.getComodo().getPortas()) {
-                if (ocupadas.contains(porta.getId())) continue;
-                Set<Integer> visitadas = new HashSet<>();
-                visitadas.add(porta.getId());
-                explorar(porta, passos - 1, visitadas, origem,
-                         ocupadas, alcancaveis);
+                origens.add(porta);
             }
+            passosIniciais = passos - 1;
+            if (passosIniciais < 0) passosIniciais = 0;
         } else {
-            Set<Integer> visitadas = new HashSet<>();
-            visitadas.add(origem.getId());
-            explorar(origem, passos, visitadas, origem,
-                     ocupadas, alcancaveis);
-        }
-        return alcancaveis;
-    }
-
-    /**
-     * Busca em profundidade limitada a "restantes" passos,
-     * marcando as casas visitadas no caminho atual para impedir
-     * revisita (regra do manual). Em cada nó:
-     *  - Se for porta de outro cômodo, o cômodo entra em
-     *    alcancaveis (entrar encerra a jogada).
-     *  - Se restantes == 0 e for corredor, a casa entra em
-     *    alcancaveis (parada válida em corredor).
-     *  - Se restantes > 0, continua para os vizinhos que não
-     *    estejam visitados nem ocupados por outro pino.
-     */
-    private void explorar(Casa atual, int restantes,
-                          Set<Integer> visitadas, Casa origem,
-                          Set<Integer> ocupadas,
-                          Set<Integer> alcancaveis) {
-        // Entrar em cômodo (de outro cômodo que não o de origem)
-        // é destino válido em qualquer profundidade — entrar pára
-        // o movimento mesmo que sobrem passos.
-        if (atual.isPorta()
-                && !(origem.isComodo()
-                     && atual.getComodo() == origem.getComodo())) {
-            Casa principal = atual.getComodo().getCasaPrincipal();
-            alcancaveis.add(principal.getId());
+            origens.add(origem);
         }
 
-        if (restantes == 0) {
-            // Parada em corredor só é destino se gastou todos os
-            // passos do dado (regra do manual).
+        // BFS multi-origem.
+        Map<Integer, Integer> distancia = new HashMap<>();
+        Queue<Casa> fila = new LinkedList<>();
+        for (Casa o : origens) {
+            distancia.put(o.getId(), 0);
+            fila.offer(o);
+        }
+
+        while (!fila.isEmpty()) {
+            Casa atual = fila.poll();
+            int d = distancia.get(atual.getId());
+
+            // Se a casa atual for uma porta, isso significa que
+            // o jogador pode entrar no cômodo correspondente
+            // (a porta também marca o cômodo como alcançável).
+            if (atual.isPorta()
+                    && !(origem.isComodo()
+                         && atual.getComodo() == origem.getComodo())) {
+                // Entrar no cômodo é o destino final; representa
+                // pelo id da casa principal.
+                Casa principal = atual.getComodo().getCasaPrincipal();
+                alcancaveis.add(principal.getId());
+            }
+
+            // A própria casa de corredor é um destino válido
+            // (exceto quando coincide com a origem).
             if (atual != origem && atual.isCorredor()) {
                 alcancaveis.add(atual.getId());
             }
-            return;
-        }
 
-        for (Casa viz : vizinhasCorredor(atual)) {
-            if (visitadas.contains(viz.getId())) continue;
-            if (ocupadas.contains(viz.getId())) continue;
-            visitadas.add(viz.getId());
-            explorar(viz, restantes - 1, visitadas, origem,
-                     ocupadas, alcancaveis);
-            visitadas.remove(viz.getId());
+            if (d >= passosIniciais) continue;
+
+            for (Casa viz : vizinhasCorredor(atual)) {
+                if (distancia.containsKey(viz.getId())) continue;
+                distancia.put(viz.getId(), d + 1);
+                fila.offer(viz);
+            }
         }
+        return alcancaveis;
     }
 
     /**
