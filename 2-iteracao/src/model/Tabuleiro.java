@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -221,17 +222,25 @@ class Tabuleiro {
      * tratamento especial: ao alcançar QUALQUER porta do cômodo,
      * o jogador pode entrar (id da porta -> id da casa principal
      * do cômodo).
+     *
+     * O conjunto {@code bloqueadas} contém ids de casas de
+     * corredor/porta ocupadas por outros pinos: o BFS não passa
+     * por elas nem permite parar nelas (regra do Clue).
      */
-    Set<Integer> mapearAlcancaveis(Casa origem, int passos) {
+    Set<Integer> mapearAlcancaveis(Casa origem, int passos,
+                                   Set<Integer> bloqueadas) {
+        if (bloqueadas == null) bloqueadas = Collections.emptySet();
         Set<Integer> alcancaveis = new HashSet<>();
 
         // Conjunto inicial de casas de onde sairemos. Se estamos
         // num cômodo, podemos sair por qualquer uma de suas
         // portas (já consumindo 1 passo para atravessar a porta).
+        // Portas ocupadas por outros pinos não podem ser usadas.
         List<Casa> origens = new ArrayList<>();
         int passosIniciais = passos;
         if (origem.isComodo()) {
             for (Casa porta : origem.getComodo().getPortas()) {
+                if (bloqueadas.contains(porta.getId())) continue;
                 origens.add(porta);
             }
             passosIniciais = passos - 1;
@@ -274,6 +283,7 @@ class Tabuleiro {
 
             for (Casa viz : vizinhasCorredor(atual)) {
                 if (distancia.containsKey(viz.getId())) continue;
+                if (bloqueadas.contains(viz.getId())) continue;
                 distancia.put(viz.getId(), d + 1);
                 fila.offer(viz);
             }

@@ -282,6 +282,9 @@ public class Jogo {
      * Lista os ids das Casas alcançáveis pelo jogador da vez,
      * dado o último lançamento. Inclui ids de cômodos: a View
      * apenas verifica se a casa clicada pertence a esse conjunto.
+     *
+     * Casas de corredor/porta ocupadas por outros pinos são
+     * excluídas (não se pode atravessar nem parar nelas).
      */
     public Set<Integer> getCasasAlcancaveis() {
         if (ultimoLancamento == null) {
@@ -289,7 +292,24 @@ public class Jogo {
         }
         Casa origem = jogadores.get(indiceJogadorAtual).getPino().getCasa();
         int passos = ultimoLancamento[0] + ultimoLancamento[1];
-        return tabuleiro.mapearAlcancaveis(origem, passos);
+        return tabuleiro.mapearAlcancaveis(origem, passos,
+                                           casasBloqueadasPorOutrosPinos());
+    }
+
+    /**
+     * Ids das casas de corredor/porta ocupadas por pinos
+     * diferentes do jogador da vez. Cômodos não bloqueiam: pela
+     * regra do Clue, vários pinos podem estar na mesma sala.
+     */
+    private Set<Integer> casasBloqueadasPorOutrosPinos() {
+        Set<Integer> bloqueadas = new HashSet<Integer>();
+        for (int i = 0; i < jogadores.size(); i++) {
+            if (i == indiceJogadorAtual) continue;
+            Casa c = jogadores.get(i).getPino().getCasa();
+            if (c == null || c.isComodo()) continue;
+            bloqueadas.add(c.getId());
+        }
+        return bloqueadas;
     }
 
     /**
@@ -301,35 +321,63 @@ public class Jogo {
      * nenhuma mensagem deve aparecer quando o destino não é
      * alcançável — o controlador apenas chama este método e
      * ignora o retorno false (nem troca o jogador da vez).
+     *
+     * Semântica do clique:
+     *   - Clique numa casa de CORREDOR ou PORTA → pino para
+     *     exatamente naquela casa.
+     *   - Clique no interior de um COMODO → pino entra no
+     *     cômodo, ocupando uma casa interna livre.
      */
     public boolean tentarMover(int linha, int coluna) {
-        if (ultimoLancamento == null && !usouPassagemSecretaNaVez) {
-            return false;
-        }
+        if (jaMoveouNestaVez || ultimoLancamento == null) return false;
         Casa destino = tabuleiro.getCasa(linha, coluna);
         if (destino == null || destino.getTipo() == TipoCasa.BLOQUEADA) {
             return false;
         }
-        if (ultimoLancamento == null) return false;
 
         Set<Integer> validas = getCasasAlcancaveis();
 
         int idAlvo;
-        if (destino.isComodo() || destino.isPorta()) {
-            // clique no interior do cômodo OU na sua porta → entra no cômodo
+        if (destino.isComodo()) {
+            // clique no interior do cômodo → entrar
             idAlvo = destino.getComodo().getCasaPrincipal().getId();
         } else {
+            // CORREDOR ou PORTA → parar exatamente na casa clicada
             idAlvo = destino.getId();
         }
         if (!validas.contains(idAlvo)) {
             return false;
         }
 
-        Casa casaFinal = tabuleiro.getCasaPorId(idAlvo);
+        Casa casaFinal;
+        if (destino.isComodo()) {
+            casaFinal = encontrarCasaLivreEm(destino.getComodo());
+        } else {
+            casaFinal = tabuleiro.getCasaPorId(idAlvo);
+        }
+
         jogadores.get(indiceJogadorAtual).getPino().setCasa(casaFinal);
         this.ultimoLancamento = null;
         this.jaMoveouNestaVez = true;
         return true;
+    }
+
+    /**
+     * Devolve a primeira casa interna do cômodo que não esteja
+     * ocupada por outro pino. Se todas estiverem ocupadas, cai
+     * de volta na casa principal (canto do cômodo).
+     */
+    private Casa encontrarCasaLivreEm(Comodo comodo) {
+        Set<Integer> ocupadas = new HashSet<Integer>();
+        for (int i = 0; i < jogadores.size(); i++) {
+            if (i == indiceJogadorAtual) continue;
+            Casa c = jogadores.get(i).getPino().getCasa();
+            if (c != null) ocupadas.add(c.getId());
+        }
+        for (Casa c : comodo.getCasas()) {
+            if (!ocupadas.contains(c.getId())) return c;
+        }
+        return comodo.getCasaPrincipal();
     }
 
     // ============================================================
@@ -354,7 +402,7 @@ public class Jogo {
         Casa c = jogadores.get(indiceJogadorAtual).getPino().getCasa();
         Comodo destino = c.getComodo().getConexaoSecreta();
         jogadores.get(indiceJogadorAtual).getPino().setCasa(
-            destino.getCasaPrincipal());
+            encontrarCasaLivreEm(destino));
         this.usouPassagemSecretaNaVez = true;
         this.ultimoLancamento = null;
         this.jaMoveouNestaVez = true;
