@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,6 +19,7 @@ public class JanelaCartas extends JFrame {
 
     // variaveis
     private final Jogo jogo;
+    private final HashMap<String, String> caminhosCarta;
 
     // métodos
 
@@ -26,11 +28,38 @@ public class JanelaCartas extends JFrame {
      */
     public JanelaCartas(Jogo jogo) {
         this.jogo = jogo;
+        this.caminhosCarta = inicializarCaminhosCarta();
         setTitle("Clue - Cartas de " + jogo.getNomeJogadorAtual());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         construirInterface();
         pack();
         setLocationRelativeTo(null);
+    }
+
+    private HashMap<String, String> inicializarCaminhosCarta() {
+        HashMap<String, String> mapa = new HashMap<String, String>();
+        mapa.put("Srta. Scarlet",   "assets/Suspeitos/Scarlet.jpg");
+        mapa.put("Coronel Mustard", "assets/Suspeitos/Mustard.jpg");
+        mapa.put("Sra. White",      "assets/Suspeitos/White.jpg");
+        mapa.put("Reverendo Green", "assets/Suspeitos/Green.jpg");
+        mapa.put("Sra. Peacock",    "assets/Suspeitos/Peacock.jpg");
+        mapa.put("Professor Plum",  "assets/Suspeitos/Plum.jpg");
+        mapa.put("Corda",           "assets/Armas/Corda.jpg");
+        mapa.put("Cano de Chumbo",  "assets/Armas/Cano.jpg");
+        mapa.put("Faca",            "assets/Armas/Faca.jpg");
+        mapa.put("Chave Inglesa",   "assets/Armas/ChaveInglesa.jpg");
+        mapa.put("Castiçal",        "assets/Armas/Castical.jpg");
+        mapa.put("Revólver",        "assets/Armas/Revolver.jpg");
+        mapa.put("Cozinha",           "assets/Comodos/Cozinha.jpg");
+        mapa.put("Sala de Música",    "assets/Comodos/SalaDeMusica.jpg");
+        mapa.put("Jardim de Inverno", "assets/Comodos/JardimInverno.jpg");
+        mapa.put("Sala de Jantar",    "assets/Comodos/SalaDeJantar.jpg");
+        mapa.put("Salão de Jogos",    "assets/Comodos/SalaoDeJogos.jpg");
+        mapa.put("Biblioteca",        "assets/Comodos/Biblioteca.jpg");
+        mapa.put("Sala de Estar",     "assets/Comodos/SalaDeEstar.jpg");
+        mapa.put("Entrada",           "assets/Comodos/Entrada.jpg");
+        mapa.put("Escritório",        "assets/Comodos/Escritorio.jpg");
+        return mapa;
     }
 
     private void construirInterface() {
@@ -88,29 +117,27 @@ public class JanelaCartas extends JFrame {
     }
 
     private JComponent criarComponenteCarta(String nome) {
-        String nomeArq = nome.toLowerCase()
-                .replace(" ", "_").replace(".", "").replace("ã", "a")
-                .replace("é", "e").replace("ê", "e").replace("ú", "u")
-                .replace("í", "i").replace("ó", "o") + ".png";
-        File arquivo = new File("assets/" + nomeArq);
-
-        if (arquivo.exists()) {
-            try {
-                final BufferedImage img = ImageIO.read(arquivo);
-                JPanel painelCarta = new JPanel() {
-                    @Override
-                    protected void paintComponent(Graphics g) {
-                        super.paintComponent(g);
-                        Graphics2D g2 = (Graphics2D) g;
-                        g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
-                    }
-                };
-                painelCarta.setPreferredSize(new Dimension(80, 110));
-                painelCarta.setMaximumSize(new Dimension(80, 110));
-                painelCarta.setAlignmentX(Component.LEFT_ALIGNMENT);
-                return painelCarta;
-            } catch (IOException e) {
-                // fallback para JLabel
+        String caminho = caminhosCarta.get(nome);
+        if (caminho != null) {
+            File arquivo = new File(caminho);
+            if (arquivo.exists()) {
+                try {
+                    final BufferedImage img = ImageIO.read(arquivo);
+                    JPanel painelCarta = new JPanel() {
+                        @Override
+                        protected void paintComponent(Graphics g) {
+                            super.paintComponent(g);
+                            Graphics2D g2 = (Graphics2D) g;
+                            g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+                        }
+                    };
+                    painelCarta.setPreferredSize(new Dimension(80, 110));
+                    painelCarta.setMaximumSize(new Dimension(80, 110));
+                    painelCarta.setAlignmentX(Component.LEFT_ALIGNMENT);
+                    return painelCarta;
+                } catch (IOException e) {
+                    // fallback para JLabel
+                }
             }
         }
 

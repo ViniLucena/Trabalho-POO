@@ -51,18 +51,17 @@ public class PainelTabuleiro extends JPanel implements MouseListener {
     }
 
     private void carregarImagens() {
-        imgTabuleiro = carregarImagem("assets/tabuleiro.png");
+        imgTabuleiro = carregarImagem("assets/Tabuleiros/Tabuleiro-Clue-A.jpg");
 
-        String[] cores    = {"Vermelho", "Amarelo", "Branco", "Verde", "Violeta", "Azul"};
-        String[] arquivos = {
-            "piao_vermelho.png", "piao_amarelo.png", "piao_branco.png",
-            "piao_verde.png",    "piao_violeta.png", "piao_azul.png"
-        };
-        for (int i = 0; i < cores.length; i++) {
-            imgPiaos.put(cores[i], carregarImagem("assets/" + arquivos[i]));
-        }
+        imgPiaos.put("Vermelho", carregarImagem("assets/Suspeitos/Scarlet.jpg"));
+        imgPiaos.put("Amarelo",  carregarImagem("assets/Suspeitos/Mustard.jpg"));
+        imgPiaos.put("Branco",   carregarImagem("assets/Suspeitos/White.jpg"));
+        imgPiaos.put("Verde",    carregarImagem("assets/Suspeitos/Green.jpg"));
+        imgPiaos.put("Violeta",  carregarImagem("assets/Suspeitos/Peacock.jpg"));
+        imgPiaos.put("Azul",     carregarImagem("assets/Suspeitos/Plum.jpg"));
+
         for (int i = 0; i < 6; i++) {
-            imgDados[i] = carregarImagem("assets/dado_" + (i + 1) + ".png");
+            imgDados[i] = carregarImagem("assets/Tabuleiros/dado" + (i + 1) + ".jpg");
         }
     }
 
