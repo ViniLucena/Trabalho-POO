@@ -24,13 +24,22 @@ public class TabuleiroTest {
     }
 
     @Test(timeout = DEFAULT_TIMEOUT)
-    public void casasNaoTransitaveisNuncaDevemAparecerNoResultado() {
+    public void casasNoResultadoSaoCorredoresOuInterioresDeComodo() {
         Casa origem = tabuleiro.getPosicaoInicial(0);
         List<Integer> alcancaveis = tabuleiro.mapearCasasAlcancaveis(origem, 4);
         for (int id : alcancaveis) {
             Casa casa = tabuleiro.getCasaPorId(id);
-            assertTrue("Casas não transitáveis nunca devem aparecer no resultado",
-                    casa.isTransitavel());
+            assertTrue("Resultado deve conter apenas corredores ou interiores de cômodo (representativas)",
+                    casa.isTransitavel() || casa.getNomeComodo() != null);
+        }
+    }
+
+    @Test(timeout = DEFAULT_TIMEOUT)
+    public void todasPosicoesIniciaisSaoTransitaveis() {
+        for (int i = 0; i < 6; i++) {
+            Casa c = tabuleiro.getPosicaoInicial(i);
+            assertTrue("Posição inicial do jogador " + i + " id=" + c.getId() + " deve ser transitável",
+                    c.isTransitavel());
         }
     }
 

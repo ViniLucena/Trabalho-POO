@@ -167,15 +167,13 @@ class Tabuleiro {
     }
 
     private void definirPosicoesIniciais() {
-        // As posições iniciais são células do corredor próximas à borda.
-        // Índice 0 = Scarlet, 1 = Mustard, 2 = White, 3 = Green, 4 = Peacock, 5 = Plum
-        // Srta. Scarlet: borda leste, entre Sala de Jantar e Biblioteca → (12, 24)
-        // Coronel Mustard: borda sul, abaixo da Sala de Jantar → (23, 3)
-        // Sra. White: borda sul, abaixo do Escritório → (23, 20)
-        // Reverendo Green: borda norte, acima do Jardim de Inverno → (0, 20)
-        // Sra. Peacock: borda oeste, entre Cozinha e Sala de Estar → (12, 0) -- mas (12,0) é transitável
-        // Professor Plum: borda norte, acima da Sala de Música → (0, 11)
-        // Verifica-se que essas células são corredores (transitável = true) ou borda.
+        // Posições conforme Tabuleiro-Clue-B.jpg:
+        // Srta. Scarlet  (0): borda sul, abaixo da Entrada         → (23, 12)
+        // Coronel Mustard(1): borda oeste, entre Jantar e Estar     → (15,  0)
+        // Sra. White     (2): borda norte, acima da Sala de Música  → ( 0, 11)
+        // Reverendo Green(3): borda norte, acima da Sala de Música  → ( 0, 13)
+        // Sra. Peacock   (4): borda leste, ao nível do Jardim/Bibli → ( 6, 24)
+        // Professor Plum (5): borda leste, entre Biblioteca/Escrit. → (16, 24)
     }
 
     private int id(int l, int c) {
@@ -196,12 +194,12 @@ class Tabuleiro {
      */
     Casa getPosicaoInicial(int indiceJogador) {
         switch (indiceJogador) {
-            case 0: return grid[12][24]; // Scarlet – borda leste
-            case 1: return grid[23][3];  // Mustard – borda sul
-            case 2: return grid[23][20]; // White – borda sul
-            case 3: return grid[0][20];  // Green – borda norte
-            case 4: return grid[12][0];  // Peacock – borda oeste
-            case 5: return grid[0][11];  // Plum – borda norte
+            case 0: return grid[23][12]; // Scarlet  – borda sul
+            case 1: return grid[15][0];  // Mustard  – borda oeste
+            case 2: return grid[0][11];  // White    – borda norte
+            case 3: return grid[0][13];  // Green    – borda norte
+            case 4: return grid[6][24];  // Peacock  – borda leste
+            case 5: return grid[16][24]; // Plum     – borda leste
             default: throw new IllegalArgumentException("Índice de jogador inválido: " + indiceJogador);
         }
     }
@@ -221,6 +219,15 @@ class Tabuleiro {
         return new ArrayList<Integer>(resultado);
     }
 
+    private String getComodoDaPorta(int idCasa) {
+        for (Comodo comodo : comodos.values()) {
+            if (comodo.getIdPortas().contains(idCasa)) {
+                return comodo.getNome();
+            }
+        }
+        return null;
+    }
+
     private void dfs(Casa atual, int passosRestantes, HashSet<Integer> visitados, HashSet<Integer> resultado) {
         if (passosRestantes == 0) {
             resultado.add(atual.getId());
@@ -236,9 +243,16 @@ class Tabuleiro {
             Casa vizinha = grid[nl][nc];
             if (!vizinha.isTransitavel()) continue;
             if (visitados.contains(vizinha.getId())) continue;
-            visitados.add(vizinha.getId());
-            dfs(vizinha, passosRestantes - 1, visitados, resultado);
-            visitados.remove(vizinha.getId());
+
+            String nomeComodo = getComodoDaPorta(vizinha.getId());
+            if (nomeComodo != null) {
+                Comodo comodo = comodos.get(nomeComodo);
+                resultado.add(comodo.getIdCasaRepresentativa());
+            } else {
+                visitados.add(vizinha.getId());
+                dfs(vizinha, passosRestantes - 1, visitados, resultado);
+                visitados.remove(vizinha.getId());
+            }
         }
     }
 

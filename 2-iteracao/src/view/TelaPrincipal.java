@@ -19,6 +19,7 @@ public class TelaPrincipal extends JFrame {
     private final Jogo jogo;
     private PainelTabuleiro painelTabuleiro;
     private JLabel lblJogadorAtual;
+    private JButton btnJogarDados;
     private JButton btnPassagem;
     private JComboBox<Integer> cbDado1;
     private JComboBox<Integer> cbDado2;
@@ -60,7 +61,7 @@ public class TelaPrincipal extends JFrame {
         sidebar.add(lblJogadorAtual);
         sidebar.add(Box.createVerticalStrut(10));
 
-        JButton btnJogarDados = criarBotao("Jogar Dados");
+        btnJogarDados = criarBotao("Jogar Dados");
         sidebar.add(btnJogarDados);
 
         btnPassagem = criarBotao("Passagem Secreta");
@@ -139,6 +140,7 @@ public class TelaPrincipal extends JFrame {
                 painelTabuleiro.setUltimoLancamento(resultado);
                 painelTabuleiro.setCasasAlcancaveis(jogo.mapearCasas(resultado));
                 painelTabuleiro.repaint();
+                btnJogarDados.setEnabled(false);
             }
         });
 
@@ -176,6 +178,7 @@ public class TelaPrincipal extends JFrame {
                 lblJogadorAtual.setText("Vez de: " + jogo.getNomeJogadorAtual()
                         + " (" + jogo.getCorJogadorAtual() + ")");
                 btnPassagem.setEnabled(jogo.temPassagemSecreta());
+                btnJogarDados.setEnabled(true);
                 painelTabuleiro.setCasasAlcancaveis(null);
                 painelTabuleiro.setUltimoLancamento(null);
                 painelTabuleiro.repaint();

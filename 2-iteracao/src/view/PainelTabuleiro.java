@@ -51,17 +51,17 @@ public class PainelTabuleiro extends JPanel implements MouseListener {
     }
 
     private void carregarImagens() {
-        imgTabuleiro = carregarImagem("assets/Tabuleiros/Tabuleiro-Clue-A.jpg");
+        imgTabuleiro = carregarImagem("../assets/Tabuleiros/Tabuleiro-Clue-A.jpg");
 
-        imgPiaos.put("Vermelho", carregarImagem("assets/Suspeitos/Scarlet.jpg"));
-        imgPiaos.put("Amarelo",  carregarImagem("assets/Suspeitos/Mustard.jpg"));
-        imgPiaos.put("Branco",   carregarImagem("assets/Suspeitos/White.jpg"));
-        imgPiaos.put("Verde",    carregarImagem("assets/Suspeitos/Green.jpg"));
-        imgPiaos.put("Violeta",  carregarImagem("assets/Suspeitos/Peacock.jpg"));
-        imgPiaos.put("Azul",     carregarImagem("assets/Suspeitos/Plum.jpg"));
+        imgPiaos.put("Vermelho", carregarImagem("../assets/Suspeitos/Scarlet.jpg"));
+        imgPiaos.put("Amarelo",  carregarImagem("../assets/Suspeitos/Mustard.jpg"));
+        imgPiaos.put("Branco",   carregarImagem("../assets/Suspeitos/White.jpg"));
+        imgPiaos.put("Verde",    carregarImagem("../assets/Suspeitos/Green.jpg"));
+        imgPiaos.put("Violeta",  carregarImagem("../assets/Suspeitos/Peacock.jpg"));
+        imgPiaos.put("Azul",     carregarImagem("../assets/Suspeitos/Plum.jpg"));
 
         for (int i = 0; i < 6; i++) {
-            imgDados[i] = carregarImagem("assets/Tabuleiros/dado" + (i + 1) + ".jpg");
+            imgDados[i] = carregarImagem("../assets/Tabuleiros/dado" + (i + 1) + ".jpg");
         }
     }
 

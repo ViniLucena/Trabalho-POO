@@ -54,7 +54,11 @@ public class JanelaNotas extends JFrame {
         Set<String> nomesNaMao = new HashSet<String>();
         for (String s : cartasStr) {
             int idx = s.lastIndexOf(" (");
-            nomesNaMao.add(s.substring(0, idx));
+            if (idx >= 0) {
+                nomesNaMao.add(s.substring(0, idx));
+            } else {
+                nomesNaMao.add(s);
+            }
         }
 
         JPanel painelGeral = new JPanel(new GridLayout(1, 3, 10, 0));
